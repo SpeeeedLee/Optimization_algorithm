@@ -1,4 +1,4 @@
-# Optimization_algorithm
+# Heuristic Optimization algorithm
 Implementing some famous Heuristic optimization algorithms (Many are still under construction)
 * Random Walk  
 * Hill Climbing
