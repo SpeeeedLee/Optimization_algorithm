@@ -6,8 +6,6 @@ X : A individual in the population
 all_X : All chromosome now in the population (each row is for a individual)
 '''
 
-# 看要不要用一個class把這些函數都包起來?
-
 def roulette_wheel_selection(all_X, population_size = 10):
     '''
     Given all_x, first calulate survuval points each solution gets, and stored in S_all_X.
@@ -42,10 +40,6 @@ def roulette_wheel_selection(all_X, population_size = 10):
 
     return S_all_X, Prob_all_x, cummulated_Prob_all_x, selected_X
 
-'''
-all_X = np.array([[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], [0,1,0,1,0,0,0,0,0,1,0,0,0,1,0], [0,1,0,1,1,0,0,0,0,0,0,0,0,1,0]])
-print(roulette_wheel_selection(all_X))
-'''
 
 def choose_two_parents(population_size, chosen_parents):
     '''
@@ -181,10 +175,13 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
     # each row is a solution, overall 10 rows
     all_X = np.random.randint(2, size=(population_size, bit_length))
     
+    # Create a list for recording the experiment process
+    best_S_of_iteration = []
+
     # Start the GA simulation
     for i in range(iteration):
 
-        print(f"start the Genetic Algorithm iteration round {i}")
+        print(f"GA : start the {i} iteration")
 
         # select the better solutions using roulette wheel mechanism (with replacement)
         _, _, _, selected_X = roulette_wheel_selection(all_X)
@@ -200,38 +197,39 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
             next_X[idx, :] = mutated_children
             idx += 1
 
-        # Store the next_X as X, to perform another round
+        # Store the next_X as all_X, to perform another round
         all_X = next_X
 
-    # calclate the final solution points, all_S
-    all_S = []
-    check_constraints = []
-    for X in all_X:
-        all_S.append(Obj_function(X, False)) # In the evaluation step, so do not use penalty
-        
-        # Check whether the final soulution satisfy all constraints (strickly)
-        if constraint_max_weight(X) and constraint_carry_items(X):
-            check_constraints.append(True)
-        else:
-            check_constraints.append(False)
+        # calclate the solution points, all_S
+        all_S = []
+        check_constraints = []
+        for X in all_X:
+            all_S.append(Obj_function(X, False)) # In the evaluation step, so do not use penalty
+            
+            # Check whether the final soulution satisfy all constraints (strickly)
+            if constraint_max_weight(X) and constraint_carry_items(X):
+                check_constraints.append(True)
+            else:
+                check_constraints.append(False)
+        # find the max in all_S that satisfy the constraints
+        all_S_constraints =  [0 if not condition else element for element, condition in zip(all_S, check_constraints)]
+        max_S_w_constraints = max(all_S_constraints)
+        best_S_of_iteration.append(max_S_w_constraints)
 
-
+    # for final generation, calculate in more details
     # find the max in all_S
     max_S = max(all_S)
-    # find the max in all_S that satisfy the constraints
-    all_S_constraints =  [0 if not condition else element for element, condition in zip(all_S, check_constraints)]
-    max_S_w_constraints = max(all_S_constraints)
     # find the carrying weights of the best solution
     best_index = all_S.index(max_S_w_constraints)
     best_solution = all_X[best_index, :]
     W = [3.3, 3.4, 6.0, 26.1, 37.6, 62.5, 100.2, 141.1, 119.2, 122.4, 247.6, 352.0, 24.2, 32.1, 42.5] 
     carrying_weights = np.dot(W,best_solution)
     
-    return all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights
+    return all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights, best_S_of_iteration
 
 
 if __name__ == '__main__':
-    all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights = main(iteration = 300, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
+    all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights, _ = main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
 
 
     print(f"All Solutions in the final Generation : \n{all_X}")

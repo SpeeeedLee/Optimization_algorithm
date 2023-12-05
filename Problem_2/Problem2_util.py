@@ -107,29 +107,3 @@ if __name__ == "__main__":
             n_possible_soulutions += 1
 
     print(n_possible_soulutions) # 6455
-
-
-
-
-
-
-
-
-'''
-Item Type Weight Survival Points
-Shadow Daggers Knife 3.3 7
-Huntsman Knife Knife 3.4 8
-Gut Knife Knife 6.0 13
-228 Compact Handgun Pistols 26.1 29
-Night Hawk Pistols 37.6 48
-Desert Eagle Magnum Pistols 62.5 99
-Ingram MAC-10 SMG Primary 100.2 177
-Leone YG1265 Auto Shotgun Primary 141.1 213
-M4A1 Carbine Primary 119.2 202
-AK-47 Rifle Primary 122.4 210
-Krieg 550 Sniper Rifles Primary 247.6 380
-M249 Machine Gun Primary 352.0 485
-Gas Mask Equipment 24.2 9
-Night-Vision Goggle Equipment 32.1 12
-Tactical Shield Equipment 42.5 15
-'''

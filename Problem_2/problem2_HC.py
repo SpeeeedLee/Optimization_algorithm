@@ -2,13 +2,10 @@ import numpy as np
 import random
 from Problem2_util import constraint_max_weight, constraint_carry_items, decimal_to_binary_array, Obj_function
 from problem2_GA import uniform_crossover, multi_bit_mutation
-
-### Need to add the code for plotting !! ###
-# 每一輪都輸出X_best
-
-
 '''
-Implying Random Walk
+Implying Hill Climbing
+(Note that the only difference of HC and RW lies in that HC always update from the current best solution)
+
 The overall steps is as follows:
 
 Step 1.
@@ -30,16 +27,18 @@ Step 4.
     If don't, "get_nearest_feasible"
         ---> Store it in "X_mutated"
 Step 5. 
-    "X_now = X_mutated"
     Evaluate the objective function 
     If it's larger than the current best 
         ---> "X_best" = "X_now"
+    else:
+        "X_now" = "X_best"
     If stop criteria met:
         Return "X_best"
     else:
         Back to Step 3.
 
 '''
+
 
 def generate_nearest_feasible(X):
     '''
@@ -71,11 +70,9 @@ def generate_nearest_feasible(X):
 
 def main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length = 15):
     '''
-    The main loop of Random Walk
+    The main loop of Hill Climbing
     input arguments:
     iteration, crossober_prob, mutation_prob, bit_length
-
-    Need to add the visualizatio in the future
     '''
 
     '''
@@ -98,10 +95,12 @@ def main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length
         X_best = X
         s_X_best = Obj_function(X_best, False)
 
+    # Create a list for recording the experiment process
+    best_S_of_iteration = []
 
     for iter in range(iteration):
 
-        print(f"Start the {iter} iteration")
+        print(f"HC : Start the {iter} iteration")
 
         '''
         Step 3.
@@ -139,39 +138,37 @@ def main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length
 
         '''
         Step 4. 
-        Check if the mutated solution satisfy the constraints.
-        If don't, "get_nearest_feasible"
-            ---> Store it in "X_mutated"
+            Check if the mutated solution satisfy the constraints.
+            If don't, "get_nearest_feasible"
+                ---> Store it in "X_mutated"
         Step 5. 
-        "X_now = X_mutated"
-        Evaluate the objective function 
-        If it's larger than the current best 
-            ---> "X_best" = "X_now"
-        If stop criteria met:
-            Return "X_best"
-        else:
-            Back to Step 2.
+            Evaluate the objective function 
+            If it's larger than the current best 
+                ---> "X_best" = "X_mutated"
+            else:
+                "X_now" = "X_best"
+            If stop criteria met:
+                Return "X_best"
+            else:
+                Back to Step 3.
         '''
-        if constraint_max_weight(X_mutated) and constraint_carry_items(X_mutated):
-            X_now = X_mutated
-        else:
+        if not(constraint_max_weight(X_mutated) and constraint_carry_items(X_mutated)):
             X_mutated = generate_nearest_feasible(X_mutated)
-            X_now = X_mutated
         
-        s_X_now  = Obj_function(X_now, False)
-        if s_X_now > s_X_best:
-            X_best = X_now
-            s_X_best = s_X_now
+        s_X_mutated  = Obj_function(X_mutated, False)
+        if s_X_mutated > s_X_best:
+            X_best = X_mutated
+            s_X_best = s_X_mutated
+
+        X_now = X_best
+
+        best_S_of_iteration.append(s_X_best)
+
+    return X_best, s_X_best, best_S_of_iteration
 
 
-    return X_best, s_X_best
-
-
-X_best, s_X_best = main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length = 15)
-print("===== Random Walk =====")
-print(f"Best suitable solution founded is : {X_best}")
-print(f"The survival point is : {s_X_best}")
-
-
-
-
+if __name__ == '__main__':
+    X_best, s_X_best, _ = main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length = 15)
+    print("===== Hill Climbing =====")
+    print(f"Best suitable solution founded is : {X_best}")
+    print(f"The survival point is : {s_X_best}")
