@@ -78,15 +78,7 @@ def Obj_function(X, penalty):
             total_points = 0
     return total_points
 
-
-
-# (b) Calculate the maximum number of possible combinations of inventory bags
-'''
-Since the solution space is just 2^15 -1 = 32767  (omitting the constraints)
-Is it feasible to iterate over the whole solution space, and exclude the solutions that do not satisfy any constraints
-'''
-if __name__ == "__main__":
-    def decimal_to_binary_array(decimal_number):
+def decimal_to_binary_array(decimal_number):
         '''
         This is a function to convert decimal number to binary number, 
         so that we can easily iterate over the whole solution space using decimal number
@@ -96,10 +88,17 @@ if __name__ == "__main__":
         # Pad the binary string with zeros to make its length 15
         binary_string_padded = binary_string.zfill(15)
         # Convert the string to an array
-        binary_array = [int(bit) for bit in binary_string_padded]
-
+        binary_list = [int(bit) for bit in binary_string_padded]
+        binary_array = np.array(binary_list)
         return binary_array
 
+
+# (b) Calculate the maximum number of possible combinations of inventory bags
+'''
+Since the solution space is just 2^15 -1 = 32767  (omitting the constraints)
+Is it feasible to iterate over the whole solution space, and exclude the solutions that do not satisfy any constraints
+'''
+if __name__ == "__main__":
     max_decimal = 32767
     n_possible_soulutions = 0
     for i in range (32767 + 1):

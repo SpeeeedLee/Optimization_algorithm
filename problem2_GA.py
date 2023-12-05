@@ -1,203 +1,243 @@
 from Problem2_util import *
-'''
-https://medium.com/hunter-cheng/python-%E5%9F%BA%E5%9B%A0%E6%BC%94%E7%AE%97%E6%B3%95-genetic-algorithm-ga-%E6%B1%82%E8%A7%A3%E6%9C%80%E4%BD%B3%E5%8C%96%E5%95%8F%E9%A1%8C-b7e6d635922
-
-'''
-
-import numpy as np
 import random
-import math
-import matplotlib.pyplot as plt
-from tqdm.notebook import tqdm
-import warnings
-import numpy as np
+
+'''
+X : A individual in the population
+all_X : All chromosome now in the population (each row is for a individual)
+'''
+
+# 看要不要用一個class把這些函數都包起來?
+
+def roulette_wheel_selection(all_X, population_size = 10):
+    '''
+    Given all_x, first calulate survuval points each solution gets, and stored in S_all_X.
+    Secondly, calculate the probability of selection based on S_all_X, and stored in Prob_all_X, 
+    Finally, get the selection results by roulette wheel selection.
+    '''
+    S_all_X = np.zeros((all_X.shape[0], 1))
+    all_S = 0
+    Prob_all_x = np.zeros((all_X.shape[0], 1))
+    cummulated_Prob_all_x = np.zeros((all_X.shape[0], 1))
+
+    for i in range(all_X.shape[0]):
+        S_X = Obj_function(all_X[i, :], True) # use penalty
+        S_all_X[i] = S_X
+        all_S += S_X
+
+    for i in range (Prob_all_x.shape[0]):
+        prob = S_all_X[i] / all_S
+        Prob_all_x[i] = prob
+        if i == 0:
+            cummulated_Prob_all_x[i] = prob
+        else:
+            cummulated_Prob_all_x[i] = cummulated_Prob_all_x[i-1] + prob
+
+    selected_X = np.zeros((population_size, all_X.shape[1]))
+    for i in range(population_size):
+        random_number = np.random.rand()
+        for j in range(cummulated_Prob_all_x.shape[0]):
+            if cummulated_Prob_all_x[j] > random_number:
+                selected_X[i,:] = all_X[j,:]
+                break
+
+    return S_all_X, Prob_all_x, cummulated_Prob_all_x, selected_X
+
+'''
+all_X = np.array([[1,0,0,0,0,0,0,0,0,0,0,0,0,0,1], [0,1,0,1,0,0,0,0,0,1,0,0,0,1,0], [0,1,0,1,1,0,0,0,0,0,0,0,0,1,0]])
+print(roulette_wheel_selection(all_X))
+'''
+
+def choose_two_parents(population_size, chosen_parents):
+    '''
+    Do not want the same combination of parents that is already appeared in "chosen parents"
+    '''
+    available_parents = list(range(population_size))
+
+    while True:
+        parent_1_idx = random.choice(available_parents)
+        available_parents.remove(parent_1_idx)
+    
+        parent_2_idx = random.choice(available_parents)
+
+        if (parent_1_idx, parent_2_idx) not in chosen_parents and (parent_2_idx, parent_1_idx) not in chosen_parents:
+            chosen_parents.append((parent_1_idx, parent_2_idx))
+            break
+    
+    if parent_1_idx < parent_2_idx:        
+        return (parent_1_idx, parent_2_idx)
+    else:
+        return (parent_2_idx, parent_1_idx)
+
+def crossover_loop(selected_X, population_size = 10, crossover_prob = 0.1):
+    
+    '''
+    The mechanism of this function is as follows:
+    1. Random sample two different parents from the selected population
+    2. Use the crossover porbability = 0.1 to perform unifrom crossover 
+        In more details:
+        with 10% probability --> create two children using unifrom crossover
+        with 90% probability --> copy the two parents as children
+    3. Back to 1. until there are 10 children created
+    ** Will want to avoid sample the same parent sets **
+    '''
+    chosen_parents = [] # record the chosen parents so we can avoid same parents combination
+    children_all_X = np.zeros((population_size, selected_X.shape[1]))
+    created_children = 0
+    while created_children < population_size:
+        (parent_1_idx, parent_2_idx) = choose_two_parents(population_size, chosen_parents)
+        chosen_parents.append((parent_1_idx, parent_2_idx))
+       
+        # perform uniform crossover
+        children_X1, children_X2 = uniform_crossover(selected_X[parent_1_idx, :], selected_X[parent_2_idx, :], crossover_prob)         
+        children_all_X[created_children, :] = children_X1
+        children_all_X[created_children + 1 , :] = children_X2
+
+        created_children += 2
+
+        '''
+        # This is not the question want us to do !
+        else:
+            # do not perform crossover, just simple copy the same Gene
+            children_all_X[created_children, :] = selected_X[parent_1_idx, :] 
+            children_all_X[created_children + 1 , :] = selected_X[parent_2_idx, :]
+        '''
+    return children_all_X
 
 
 
-class GeneticAlgorithm:
-    def __init__(self, Nnumber=10, Dimension=15, Bitnum=2, 
-                       Elite_num=10, CrossoverRate=0.9, 
-                       MutationRate=0.2, MaxIteration=20 ):
-        self.N = Nnumber
-        self.D = Dimension
-        self.B = Bitnum
-        self.n = Elite_num
-        self.cr = CrossoverRate
-        self.mr = MutationRate
-        self.max_iter = MaxIteration
+def uniform_crossover(parent_X1, parent_X2, crossover_prob):
+    '''
+    Generate a 1*15 random list for reference, with its element being either 0 or 1
+    Each element of this random list is 1 with corssover_prob, 0 with (1-crossover_prob) 
+    if 0 --> (90%)
+    the first children will look at the first parent at that location
+    the second children will look at the second parent at that location
+    
+    if 1 --> (10%)
+    the first children will look at the second parent at that location
+    the second children will look at the first parent at that location
+    '''
+    reference_list = []
+    for i in range(parent_X1.shape[0]):
+        random_num = np.random.rand()
+        if random_num >  crossover_prob:
+            reference_list.append(0)
+        else:
+            reference_list.append(1)
+
+    children_X1 = np.zeros_like(parent_X1)
+    children_X2 = np.zeros_like(parent_X2)
+
+    for i in range(parent_X1.shape[0]):
+        if reference_list[i] == 0 :
+            children_X1[i] = parent_X1[i]
+            children_X2[i] = parent_X2[i]
+        else:
+            children_X1[i] = parent_X2[i]
+            children_X2[i] = parent_X1[i]
+    
+    return children_X1, children_X2
+            
+ 
+
+
+def multi_bit_mutation(X, mutation_prob = 0.20):
+    '''
+    Do the multi bit flip mutation (consecutive based on item types), 
+    In more details, 
+        ranodom choose one item type from the total 4 item types
+        flip the bit on items belong to that type only
+    '''
+    random_number = np.random.rand()
+    if random_number > mutation_prob:
+        return X
+    else:
+        chosen_item_type = random.randint(1, 4)
+        if chosen_item_type == 1:
+            flip_location = [0,1,2]
+            X[flip_location] = 1 - X[flip_location]
+        elif chosen_item_type == 2:
+            flip_location = [3,4,5]
+            X[flip_location] = 1 - X[flip_location]
+        elif chosen_item_type == 3:    
+            flip_location = [6,7,8,9,10,11]
+            X[flip_location] = 1 - X[flip_location]
+        elif chosen_item_type == 4:
+            flip_location = [12,13,14]
+            X[flip_location] = 1 - X[flip_location]
+        return X
+
+    
+def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length = 15, population_size = 10):
+    '''
+    The main loop of GA
+    input arguments:
+    iteration, crossober_prob, mutation_prob, bit_length, population_size
+
+    Need to add the visualizatio in the future
+    '''
+
+    # Generate the first population, denoted as all_X
+    # each row is a solution, overall 10 rows
+    all_X = np.random.randint(2, size=(population_size, bit_length))
+    
+    # Start the GA simulation
+    for i in range(iteration):
+
+        print(f"start the Genetic Algorithm iteration round {i}")
+
+        # select the better solutions using roulette wheel mechanism (with replacement)
+        _, _, _, selected_X = roulette_wheel_selection(all_X)
         
-    def generatePopulation(self):
-        population = []
-        for number in range(self.N):
-            chrom_list = []
-            for run in range(self.D):
-                element = (np.zeros((1,self.B))).astype(int)
-                for i in range(1):
-                    for j in range(self.B):
-                        element[i,j] = np.random.randint(0,2)
-                chromosome = list(element[0])
-                chrom_list.append(chromosome)
-            population.append(chrom_list)
-        return population
+        # do the crossover
+        children_all_X = crossover_loop(selected_X, population_size = population_size, crossover_prob = crossover_prob)
+
+        # do the mutation
+        next_X = np.zeros_like(all_X)
+        idx = 0
+        for children in children_all_X:
+            mutated_children = multi_bit_mutation(children, mutation_prob)
+            next_X[idx, :] = mutated_children
+            idx += 1
+
+        # Store the next_X as X, to perform another round
+        all_X = next_X
+
+    # calclate the final solution points, all_S
+    all_S = []
+    check_constraints = []
+    for X in all_X:
+        all_S.append(Obj_function(X, False)) # In the evaluation step, so do not use penalty
         
-    def B2D(self, pop):
-        dec = str(pop[0])+str(pop[1])+str(pop[2])+str(pop[3])
-        return int(str(dec),2)
+        # Check whether the final soulution satisfy all constraints (strickly)
+        if constraint_max_weight(X) and constraint_carry_items(X):
+            check_constraints.append(True)
+        else:
+            check_constraints.append(False)
+
+
+    # find the max in all_S
+    max_S = max(all_S)
+    # find the max in all_S that satisfy the constraints
+    all_S_constraints =  [0 if not condition else element for element, condition in zip(all_S, check_constraints)]
+    max_S_w_constraints = max(all_S_constraints)
+    # find the carrying weights of the best solution
+    best_index = all_S.index(max_S_w_constraints)
+    best_solution = all_X[best_index, :]
+    W = [3.3, 3.4, 6.0, 26.1, 37.6, 62.5, 100.2, 141.1, 119.2, 122.4, 247.6, 352.0, 24.2, 32.1, 42.5] 
+    carrying_weights = np.dot(W,best_solution)
     
-    def D2B(self, num):
-        return [int(i) for i in (bin(10)[2:])]
-    
-    # Rastrigin function
-    def fun(self, pop):
-        X = np.array(pop)
-        funsum = 0
-        for i in range(self.D):
-            x = X[:,i]
-            funsum += x**2 - 10*np.cos(2*np.pi*x)
-        funsum += 10*self.D
-        return list(funsum)
-    
-    # Selection method 2
-    def Selection(self, n, pop_bin, fitness):
-        select_bin = pop_bin.copy()
-        fitness1 = fitness.copy()
-        Parents = []
-        if sum(fitness1) == 0:
-            for i in range(self.n):
-                parent = select_bin[random.randint(0,(self.N)-1)]
-                Parents.append(parent)
-        else: 
-            NorParent = [(1 - indivi/sum(fitness1))/((self.N-1)) for indivi in fitness1]
-            tep = 0
-            Cumulist = []
-            for i in range(len(NorParent)):
-                tep += NorParent[i]
-                Cumulist.append(tep)
-            #Find parents
-            for i in range(self.n):
-                z1 = random.uniform(0,1)
-                for pick in range(len(Cumulist)):
-                    if z1<=Cumulist[0]:
-                        parent = select_bin[NorParent.index(NorParent[0])]
-                    elif Cumulist[pick] < z1 <=Cumulist[pick+1]:
-                        parent = select_bin[NorParent.index(NorParent[pick+1])]
-                Parents.append(parent)
-        return Parents
-    
-    # Crossover & Mutation
-    def Crossover_Mutation(self, parent1, parent2):
-        def swap_machine(element_1, element_2):
-            temp = element_1
-            element_1 = element_2
-            element_2 = temp
-            return element_1, element_2
-        child_1 = []
-        child_2 = []
-        for i in range(len(parent1)):
-            #隨機生成一數字，用以決定是否進行Crossover
-            z1 = random.uniform(0,1)
-            if z1 < self.cr:
-                z2 = random.uniform(0,1)
-                #決定要交換的位置點
-                cross_location = math.ceil(z2*(len(parent1[i])-1))
-                #Crossover
-                parent1[i][:cross_location],parent2[i][:cross_location] = swap_machine(parent1[i][:cross_location],parent2[i][:cross_location])
-                p_list = [parent1[i], parent2[i]]
-                #隨機生成一數字，用以決定是否進行mutation
-                for i in range(len(p_list)):
-                    z3 = random.uniform(0,1)
-                    if z3 < self.mr:
-                        #決定要mutate的數字
-                        z4 = random.uniform(0,1)
-                        temp_location = z4*(len(p_list[i])-1)
-                        mutation_location = 0 if temp_location < 0.5 else math.ceil(temp_location)
-                        p_list[i][mutation_location] = 0 if p_list[i][mutation_location] == 1 else 1
-                child_1.append(p_list[0])
-                child_2.append(p_list[1])
-            else:
-                child_1.append(parent1[i])
-                child_2.append(parent2[i])
-        return child_1,child_2
+    return all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights
 
-def main():
-    ga = GeneticAlgorithm()
-    print(ga.N, ga.D, ga.B)
-    pop_bin = ga.generatePopulation()
-    pop_dec = []
-    for i in range(ga.N):
-        chrom_rv = []
-        for j in range(ga.D):
-            chrom_rv.append(ga.B2D(pop_bin[i][j]))
-        pop_dec.append(chrom_rv)
-    fitness = ga.fun(pop_dec)
-    
-    best_fitness = min(fitness)
-    arr = fitness.index(best_fitness)
-    best_dec = pop_dec[arr]
-    
-    best_rvlist = []
-    best_valuelist = []
 
-    it = 0
-    while it < ga.max_iter:
-        Parents_list = ga.Selection(ga.n, pop_bin, fitness)
-        Offspring_list = []
-        for i in range(int((ga.N-ga.n)/2)):
-            candidate = [Parents_list[random.randint(0,len(Parents_list)-1)] for i in range(2)]
-            after_cr_mu = ga.Crossover_Mutation(candidate[0], candidate[1])
-            offspring1, offspring2 = after_cr_mu[0], after_cr_mu[1]
-            Offspring_list.append(offspring1)
-            Offspring_list.append(offspring2)
-
-        final_bin = Parents_list + Offspring_list
-        final_dec = []
-        for i in range(ga.N):
-            rv = []
-            for j in range(ga.D):
-                rv.append(ga.B2D(final_bin[i][j]))
-            final_dec.append(rv)
-
-        # Final fitness
-        final_fitness = ga.fun(final_dec)
-
-        #Take the best value in this iteration
-        smallest_fitness = min(final_fitness)
-        index = final_fitness.index(smallest_fitness)
-        smallest_dec = final_dec[index]
-
-        #Store the best fitness in the list
-        best_rvlist.append(smallest_dec)
-        best_valuelist.append(smallest_fitness)
-
-        #Parameters back to the initial
-        pop_bin = final_bin 
-        pop_dec = final_dec
-        fitness = final_fitness
-
-        it += 1
-    
-    #Store best result
-    every_best_value = []
-    every_best_value.append(best_valuelist[0])
-    for i in range(ga.max_iter-1):
-        if every_best_value[i] >= best_valuelist[i+1]:
-            every_best_value.append(best_valuelist[i+1])
-
-        elif every_best_value[i] <= best_valuelist[i+1]:
-            every_best_value.append(every_best_value[i])
-
-    print('The best fitness: ', min(best_valuelist))
-    best_index = best_valuelist.index(min(best_valuelist))
-    print('Setup list is: ')
-    print(best_rvlist[best_index])
-
-    plt.figure(figsize = (15,8))
-    plt.xlabel("Iteration",fontsize = 15)
-    plt.ylabel("Fitness",fontsize = 15)
-
-    plt.plot(every_best_value,linewidth = 2, label = "Best fitness convergence", color = 'b')
-    plt.legend()
-    plt.show()
-    
 if __name__ == '__main__':
-    main()
+    all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights = main(iteration = 300, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
+
+
+    print(f"All Solutions in the final Generation : \n{all_X}")
+    print(f"All Survival points in the final Generation : \n{all_S}")
+    print(f"Maximun Survival points in the final Generation : \n{max_S}")
+    print(f"Do every final solutions satisfy the constraints ? : \n{check_constraints}")
+    print(f"Maximun Survival points in the final Generation that satisfy every constraints : \n{max_S_w_constraints}")
+    print(f"Best suitable solution : \n{best_solution}")
+    print(f"Carrying weights of the best solution : \n{carrying_weights}")
