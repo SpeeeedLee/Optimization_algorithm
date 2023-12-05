@@ -35,6 +35,11 @@ Step 5.
 
 '''
 
+def generate_nearest_feasible(X):
+
+    return
+
+
 def main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length = 15):
     '''
     The main loop of Random Walk
@@ -45,12 +50,23 @@ def main(iteration = 200, crossover_prob = 0.1, mutation_prob = 0.20, bit_length
     '''
 
     # Generate the initial solution
+    # Check if the initial solution satisfy the constraints.
+    # If don't, "get_nearest_feasible"
+    #    ---> Store it in "X_now"
+    #    ---> "X_best" = "X_now"
+    
     X = np.random.randint(2, size=(bit_length))
-
-    x = 
-
+    if constraint_max_weight(X) and constraint_carry_items(X):
+        X_now = X
+        X_best = X
+    else:
+        X = generate_nearest_feasible(X)
+        X_now = X
+        X_best = X
 
     return X
+
+
 
 X = main()
 print(X)
