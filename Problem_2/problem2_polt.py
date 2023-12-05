@@ -78,8 +78,8 @@ def plot_and_save(means1, stds1, means2, stds2, means3, stds3):
     
     plt.legend()
     plt.grid(True)
-    plt.show()
     plt.savefig('./Problem_2/progress_diagram.png', dpi=300)
+    plt.show()
 
 
 
