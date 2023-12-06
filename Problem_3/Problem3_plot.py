@@ -37,7 +37,7 @@ def run(num_node = 16, iteration = 100, exp_num = 10, population_size = 10):
         S_TS.append(TS_best_S_of_iteration)
 
         _, _, SA_best_S_of_iteration = Problem3_SA.main(iteration = iteration, num_node = num_node)
-        S_SA.append(TS_best_S_of_iteration)
+        S_SA.append(SA_best_S_of_iteration)
 
 
     S_ACO_arr = np.array(S_ACO)

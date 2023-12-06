@@ -42,17 +42,6 @@ if __name__ == '__main__':
     print(f"number of evaluation of objective function required if using exhaustive enumeration : {all_possible_solution}") 
 
 
-# (c) Random Walk
-'''
-The design solution vector X, which is a one dimensional *list* with lenght 16, 
-Each middle element in the vector is a positive integer from 1 to 14. No repeat value (Do not visit the same city twice)
-The first element and the last element are 0 (start and end at Incheon)
-
-We use city_mutation() to perform a local search.
-Also, we use Obj_function() to calculate the overall distance.
-In this problem, we do not set any constraints(compare to problem 2), since we now just do not allow a mutation from 
-feasible solution to non-feasible solution in city_mutation()
-'''
 
 def Obj_function(X):
     '''
