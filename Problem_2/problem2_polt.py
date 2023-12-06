@@ -4,9 +4,9 @@ import problem2_GA, problem2_HC, problem2_RW
 
 '''
 Ploting the diagram:
-y axis : objective function of the best solution  
+y axis : objective function of the best solution found so far
 x axis : number of function evaluation 
-(for RW & FC, is equivalent to iteration round；for GA, equivalent to (iteration round) * (population size) )
+(for RW & HC, is equivalent to iteration round；for GA, equivalent to (iteration round) * (population size) )
 
 Do 10 experiments for each of the 3 algorithms and plot the mean and standard deviation
 '''
@@ -19,7 +19,7 @@ def run(bit_length, iteration, exp_num, population_size, crossover_prob, mutatio
     S_RW = []
 
     for exp in range(exp_num):
-        _, _, _, _, _, _, _, GA_best_S_of_iteration = problem2_GA.main(
+        _, _, _, GA_best_S_of_iteration = problem2_GA.main(
             int(iteration / population_size), crossover_prob, mutation_prob, bit_length, population_size)
         S_GA.append(GA_best_S_of_iteration)
         
@@ -78,7 +78,7 @@ def plot_and_save(means1, stds1, means2, stds2, means3, stds3):
     
     plt.legend()
     plt.grid(True)
-    plt.savefig('./Problem_2/progress_diagram.png', dpi=300)
+    plt.savefig('./Problem_2/progress_diagram_1.png', dpi=300)
     plt.show()
 
 

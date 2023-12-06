@@ -244,7 +244,7 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
 
 
 if __name__ == '__main__':
-    best_Xwc_of_iteration, best_S_of_iteration, best_Xwc_for_now, best_S_for_now = main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
+    best_Xwc_of_iteration, best_S_of_iteration, best_Xwc_for_now, best_S_for_now = main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.10, bit_length = 15, population_size = 10)
 
     print("===== Genetic Alforithm =====")
     print(f"Best combination found is : {best_Xwc_for_now[-1]}")
