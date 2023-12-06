@@ -47,7 +47,7 @@ if mod(iteratoin_num, 7) == 0:
 '''
 
 import numpy as np 
-import random
+import random 
 from util import Obj_function, city_mutation
 
 # Note that in this problem, we want to find a minima, not a maxima like in Problem 2.
@@ -79,16 +79,33 @@ def main(iteration = 100, num_node = 16):
     for iter in range(iteration):
 
         print(f"TS : Start the {iter} iteration")
-
+        
+        
+        # Aspiration Criteria : Clear the tabu list when iteration number is 7n
         if np.mod(iter, 7) == 0:
             tabu_list = []
+        
         '''
         Step 3.
         Do the "Mutation" on "X_now"
+        and record the mutation method, then add it to the tabu list
         '''
-        X_mutated = city_mutation(X_now, tabu_list[0], tabu_list[1])
-        print(X_mutated)
+        if len(tabu_list) == 2:
+            X_mutated, mutated_idx = city_mutation(X_now, tabu_list[0], tabu_list[1])
+        elif len(tabu_list) == 1:
+            X_mutated, mutated_idx = city_mutation(X_now, tabu_list[0], None)
+        else:
+            X_mutated, mutated_idx = city_mutation(X_now, None, None)
 
+        s_X_mutated = Obj_function(X_mutated)
+
+        # Maintain a Tabu List with Tabu Tenure = 2
+        # First in First out
+        if len(tabu_list) == 2:
+            tabu_list.pop(0)
+            tabu_list.append(mutated_idx)
+        else:
+            tabu_list.append(mutated_idx)
         '''
         Step 4. 
             "X_now = X_mutated"
@@ -100,13 +117,14 @@ def main(iteration = 100, num_node = 16):
             else:
                 Back to Step 2.
         '''
-        X_now = X_mutated
-        
-        s_X_now  = Obj_function(X_now)
+        X_now = X_mutated        
+        s_X_now  = s_X_mutated
         if s_X_now < s_X_best:
             X_best = X_now
             s_X_best = s_X_now
-        
+
+        print(f"{X_now}, path length : {s_X_now}, best : {s_X_best}")  
+
         best_S_of_iteration.append(s_X_best)
 
     return X_best, s_X_best, best_S_of_iteration

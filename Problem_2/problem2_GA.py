@@ -176,7 +176,12 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
     all_X = np.random.randint(2, size=(population_size, bit_length))
     
     # Create a list for recording the experiment process
+    # Create a list for recording the experiment process    
+    best_Xwc_of_iteration = []
     best_S_of_iteration = []
+
+    best_S_for_now = []
+    best_Xwc_for_now = []
 
     # Start the GA simulation
     for i in range(iteration):
@@ -200,7 +205,7 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
         # Store the next_X as all_X, to perform another round
         all_X = next_X
 
-        # calclate the solution points, all_S
+        # calculate the solution points, all_S
         all_S = []
         check_constraints = []
         for X in all_X:
@@ -214,8 +219,17 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
         # find the max in all_S that satisfy the constraints
         all_S_constraints =  [0 if not condition else element for element, condition in zip(all_S, check_constraints)]
         max_S_w_constraints = max(all_S_constraints)
+        best_Xwc = all_X[all_S_constraints.index(max_S_w_constraints)]
         best_S_of_iteration.append(max_S_w_constraints)
+        best_Xwc_of_iteration.append(best_Xwc)
 
+        # find the best combination found SO FAR 
+        best_overall_S = max(best_S_of_iteration)
+        best_overall_Xwc = best_Xwc_of_iteration[best_S_of_iteration.index(best_overall_S)]
+        best_S_for_now.append(best_overall_S)
+        best_Xwc_for_now.append(best_overall_Xwc)
+
+    '''
     # for final generation, calculate in more details
     # find the max in all_S
     max_S = max(all_S)
@@ -224,18 +238,24 @@ def main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.20, bit_length 
     best_solution = all_X[best_index, :]
     W = [3.3, 3.4, 6.0, 26.1, 37.6, 62.5, 100.2, 141.1, 119.2, 122.4, 247.6, 352.0, 24.2, 32.1, 42.5] 
     carrying_weights = np.dot(W,best_solution)
-    
-    return all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights, best_S_of_iteration
+    '''
+
+    return best_Xwc_of_iteration, best_S_of_iteration, best_Xwc_for_now, best_S_for_now
 
 
 if __name__ == '__main__':
-    all_X, all_S, max_S, check_constraints, max_S_w_constraints, best_solution, carrying_weights, _ = main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
+    best_Xwc_of_iteration, best_S_of_iteration, best_Xwc_for_now, best_S_for_now = main(iteration = 20, crossover_prob = 0.1, mutation_prob = 0.50, bit_length = 15, population_size = 10)
 
+    print("===== Genetic Alforithm =====")
+    print(f"Best combination found is : {best_Xwc_for_now[-1]}")
+    print(f"The largest survival point is : {best_S_for_now[-1]}")
+    print(f"The largest survival point found in each iteration is : \n{best_S_of_iteration}")
+    print(f"The largest survival point found in progress is : \n{best_S_for_now}")
 
-    print(f"All Solutions in the final Generation : \n{all_X}")
-    print(f"All Survival points in the final Generation : \n{all_S}")
-    print(f"Maximun Survival points in the final Generation : \n{max_S}")
-    print(f"Do every final solutions satisfy the constraints ? : \n{check_constraints}")
-    print(f"Maximun Survival points in the final Generation that satisfy every constraints : \n{max_S_w_constraints}")
-    print(f"Best suitable solution : \n{best_solution}")
-    print(f"Carrying weights of the best solution : \n{carrying_weights}")
+    # print(f"All Solutions in the final Generation : \n{all_X}")
+    # print(f"All Survival points in the final Generation : \n{all_S}")
+    # print(f"Maximun Survival points in the final Generation : \n{max_S}")
+    # print(f"Do every final solutions satisfy the constraints ? : \n{check_constraints}")
+    # print(f"Maximun Survival points in the final Generation that satisfy every constraints : \n{max_S_w_constraints}")
+    # print(f"Best suitable solution : \n{best_solution}")
+    # print(f"Carrying weights of the best solution : \n{carrying_weights}")

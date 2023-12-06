@@ -93,20 +93,64 @@ def city_mutation(X, limit_1, limit_2):
 
     num_node =len(X)
     random_number = np.random.rand()
-    
-    if random_number <= 1/3:
-        mutated_X = two_opt_mutation(X, num_node)
-        mutated_type = 1
-        print("==== 2-opt operation ====")
-    elif random_number >= 2/3:
-        mutated_X = reinsertion_mutation(X, num_node)
-        mutated_type = 2
-        print("====   Reinsertion   ====")
-    else:
-        mutated_X = flip_path_mutation(X, num_node)
-        mutated_type = 3
-        print("====    Flip Path    ====")
 
+    if (limit_1 is None) and (limit_2 is None):        
+        if random_number <= 1/3:
+            mutated_X = two_opt_mutation(X, num_node)
+            mutated_type = 1
+            print("==== 2-opt operation ====")
+        elif random_number >= 2/3:
+            mutated_X = reinsertion_mutation(X, num_node)
+            mutated_type = 2
+            print("====   Reinsertion   ====")
+        else:
+            mutated_X = flip_path_mutation(X, num_node)
+            mutated_type = 3
+            print("====    Flip Path    ====")
+    else:
+        if (limit_2 is None):
+        # given only one element in the Tabu list
+            if (limit_1 == 1):
+                if (random_number < 1/2):
+                    mutated_X = reinsertion_mutation(X, num_node)
+                    mutated_type = 2
+                    print("====   Reinsertion   ====")
+                else:
+                    mutated_X = flip_path_mutation(X, num_node)
+                    mutated_type = 3
+                    print("====    Flip Path    ====")         
+            elif (limit_1 == 2):
+                if (random_number < 1/2):
+                    mutated_X = two_opt_mutation(X, num_node)
+                    mutated_type = 1
+                    print("==== 2-opt operation ====")
+                else:
+                    mutated_X = flip_path_mutation(X, num_node)
+                    mutated_type = 3
+                    print("====    Flip Path    ====")
+            elif (limit_1 == 3):
+                if (random_number < 1/2):
+                    mutated_X = two_opt_mutation(X, num_node)
+                    mutated_type = 1
+                    print("==== 2-opt operation ====")
+                else:
+                    mutated_X = reinsertion_mutation(X, num_node)
+                    mutated_type = 2
+                    print("====   Reinsertion   ====")
+        else:
+        # given totally two elements in the Tabu list
+            if (limit_1 != 1)  and (limit_2 != 1):
+                mutated_X = two_opt_mutation(X, num_node)
+                mutated_type = 1
+                print("==== 2-opt operation ====")
+            elif (limit_1 != 2)  and (limit_2 != 2):
+                mutated_X = reinsertion_mutation(X, num_node)
+                mutated_type = 2
+                print("====   Reinsertion   ====")
+            elif (limit_1 != 3)  and (limit_2 != 3):
+                mutated_X = flip_path_mutation(X, num_node)
+                mutated_type = 3
+                print("====    Flip Path    ====")
     return mutated_X, mutated_type
 
 def two_opt_mutation(X, num_node):

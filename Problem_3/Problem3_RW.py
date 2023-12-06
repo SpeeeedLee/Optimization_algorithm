@@ -35,9 +35,9 @@ def main(iteration = 100, num_node = 16):
         Step 3.
         Do the "Mutation" on "X_now"
         '''
-        X_mutated, _ = city_mutation(X_now)
-        print(X_mutated)
-
+        X_mutated, _ = city_mutation(X_now, None, None)        
+        X_now = X_mutated
+        s_X_now  = Obj_function(X_now)
         '''
         Step 4. 
             "X_now = X_mutated"
@@ -49,13 +49,13 @@ def main(iteration = 100, num_node = 16):
             else:
                 Back to Step 2.
         '''
-        X_now = X_mutated
-        
-        s_X_now  = Obj_function(X_now)
+
         if s_X_now < s_X_best:
             X_best = X_now
             s_X_best = s_X_now
         
+        print(f"{X_now}, path length : {s_X_now}, best : {s_X_best}")
+
         best_S_of_iteration.append(s_X_best)
 
     return X_best, s_X_best, best_S_of_iteration
