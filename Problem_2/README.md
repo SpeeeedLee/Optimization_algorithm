@@ -47,9 +47,32 @@ __(f)__
 Since in each GA round, there are "population size (10)" solutions being explored and evaluated. Which is not the case in RW, HC that they only explore one solution in each iteration.  
 So I follow the suggestion from the question and plot the progress diagram as follows:  
 (all three algorithms were experimented 10 times and the mean, std are plot)  
-![Progress Plot](./progress_diagram.png)
+- mutation_rate for "multi bit flip mutation consecutive based on item types": 10%
+- crossover_rate : 20% 
+![Progress Plot](./progress_diagram_0.png)
 
-If we let the operator (i.e. how to change from solutions to solutions between to iterations) of all three algorithms, we can expect a larger variation(std) of all three algorithms:  
+One can easily observe that GA can reach better solution than RW & HC, where they will converge to local minima.
+However, GA fail to gaurantee to provide good performance in different individaul experiments(high std).  
+Let's try with tuning the hyperparameters and see what we will get
+
+If we let the operator (i.e. how to change from solutions to solutions between to iterations) of all three algorithms to be more diverse:
+- mutation_rate for "multi bit flip mutation consecutive based on item types": 80%
+- crossover_rate : 40% 
+![Progress Plot1](./progress_diagram_1.png)
+
+We can see obvious larger std in GA in the begining, but not much change in RW, HC.
+This might due to the randomness eseence of RW, HC. The effect of crossover and mutation operator will not travel too much.
+But in GA, the effect of crossover and mutation is crucial to distribution of a population of offspring.
+
+Now, try to turn off crossover:
+- mutation_rate for "multi bit flip mutation consecutive based on item types": 80%
+- crossover_rate : 0%
 ![Progress Plot2](./progress_diagram_2.png)
 
-With these results in mind, it is obvious that tunig the hyperparameters to fit the properties of the question is important.
+How about turn off mutation ?
+- mutation_rate for "multi bit flip mutation consecutive based on item types": 0%
+- crossover_rate : 40% 
+![Progress Plot3](./progress_diagram_3.png)
+
+With these results in mind, it is obvious that tunig the hyperparameters to fit the properties of the question scenario is critical for GA.  
+Also, through the ablation study, crossover and mutation are both important and useful operators.

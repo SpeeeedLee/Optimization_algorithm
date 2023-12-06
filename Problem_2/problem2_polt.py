@@ -78,13 +78,13 @@ def plot_and_save(means1, stds1, means2, stds2, means3, stds3):
     
     plt.legend()
     plt.grid(True)
-    plt.savefig('./Problem_2/progress_diagram_1.png', dpi=300)
+    plt.savefig('./Problem_2/progress_diagram_3.png', dpi=300)
     plt.show()
 
 
 
 if __name__ == '__main__':
     expanded_GA_means, expanded_GA_stds, HC_means, HC_stds, RW_means, RW_stds = run(
-        bit_length = 15, iteration = 800, exp_num = 10, population_size = 10, crossover_prob = 0.1, mutation_prob = 0.3)
+        bit_length = 15, iteration = 800, exp_num = 10, population_size = 10, crossover_prob = 0.4, mutation_prob = 0)
     
     plot_and_save(expanded_GA_means, expanded_GA_stds, HC_means, HC_stds, RW_means, RW_stds)
