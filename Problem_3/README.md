@@ -1,33 +1,34 @@
-Answer of every sub-problem are listed below
-__(a), (b)__
+Answer of every sub-problem are listed below  
+__(a), (b)__  
 Please refer to `Distance Table` in `./util.py`
 
 __(c)、(d)、(e)、(f)、(g)__  
 See the .py file in this folder for implemeting details.
 
-The constraint of this problem is that the salesman can not travel to the city that he already visited.
-Unlike in problem 1, where I try to add penalty when the constraint is break. 
-In this problem, I just simply define a mutation rules that will not transfer a suitable solution to a unsuitable solution.
+The constraint of this problem is that the salesman can not travel to the city that he already visited.  
+Unlike in problem 1, where I try to add penalty when the constraint is break.  
+In this problem, I just simply define a mutation rules that will not transfer a suitable solution to a unsuitable solution.  
 
-Specificially, the code support three types of mutation operation:
-`two_opt_mutation`
-`reinsertion_mutation`
-`flip_path_mutation`
-Here is a simple demo of this three operators:
-original : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
-==== 2-opt operation ====
-(switch neighbor nodes sequentially at random 3 location)
-[0, 2, 1, 3, 4, 6, 7, 5, 8, 9, 0] 
-[0, 2, 1, 4, 3, 5, 6, 8, 7, 9, 0]
-...
-====   Reinsertion   ====
-(pick a random node out and insert it at another random location, do twice sequentially)
-[0, 1, 6, 3, 2, 4, 5, 7, 8, 9, 0] 
-[0, 1, 9, 2, 3, 7, 4, 5, 6, 8, 0]
-...
-====    Flip Path    ====
-(pick random two nodes as start and end, reverse the path in beween. The chosen path should be >= 3)
-[0, 1, 8, 7, 6, 5, 4, 3, 2, 9, 0] 
+Specificially, the code support three types of mutation operation:  
+`two_opt_mutation`  
+`reinsertion_mutation`  
+`flip_path_mutation`  
+
+Here is a simple demo of this three operators:  
+original : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0]  
+==== 2-opt operation ====  
+(switch neighbor nodes sequentially at random 3 location)  
+[0, 2, 1, 3, 4, 6, 7, 5, 8, 9, 0]   
+[0, 2, 1, 4, 3, 5, 6, 8, 7, 9, 0]  
+...  
+====   Reinsertion   ====  
+(pick a random node out and insert it at another random location, do twice sequentially)  
+[0, 1, 6, 3, 2, 4, 5, 7, 8, 9, 0]   
+[0, 1, 9, 2, 3, 7, 4, 5, 6, 8, 0]  
+...  
+====    Flip Path    ====  
+(pick random two nodes as start and end, reverse the path in beween. The chosen path should be >= 3)  
+[0, 1, 8, 7, 6, 5, 4, 3, 2, 9, 0]   
 [0, 1, 2, 8, 7, 6, 5, 4, 3, 9, 0]
 
 ----
